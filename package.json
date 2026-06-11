@@ -14,7 +14,8 @@
     "scripts/agnes.js",
     "scripts/postinstall.js",
     "npm-bundles",
-    "README.md"
+    "README.md",
+    "README.en.md"
   ],
   "scripts": {
     "build": "go build -o bin/agnes .",
