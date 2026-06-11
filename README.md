@@ -24,7 +24,7 @@ Before the first npm publish, configure npm Trusted Publishing for this package:
 2. Add GitHub Actions as a Trusted Publisher.
 3. Use repository `Constantine1916/agnes-cli`.
 4. Use workflow filename `release.yml`.
-5. Allow the `npm publish` action.
+5. Leave environment blank unless this workflow later adds a GitHub Environment.
 
 No `NPM_TOKEN` GitHub secret is required.
 
