@@ -12,6 +12,30 @@ go build -o bin/agnes .
 ./bin/agnes doctor --offline
 ```
 
+## Release
+
+Releases are tag-driven. A tag like `v0.1.0` builds macOS, Linux, and Windows
+binaries with GoReleaser, uploads them to GitHub Releases, then publishes the
+npm wrapper package.
+
+Before the first npm publish, add an `NPM_TOKEN` repository secret with publish
+permission for the `agnes-cli` package.
+
+```bash
+npm version patch --no-git-tag-version
+git add package.json
+git commit -m "Release v0.1.1"
+git tag v0.1.1
+git push origin main --tags
+```
+
+After publish, users install with:
+
+```bash
+npm install -g agnes-cli
+agnes --version
+```
+
 ## API Key
 
 No login is required. Configure a key with one of:

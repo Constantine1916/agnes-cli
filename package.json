@@ -1,7 +1,11 @@
 {
   "name": "agnes-cli",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Agent-friendly CLI for Agnes image and video generation.",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "agnes": "./scripts/agnes.js",
     "agnes-cli": "./scripts/agnes.js"
@@ -13,13 +17,22 @@
   ],
   "scripts": {
     "build": "go build -o bin/agnes .",
-    "test": "go test ./..."
+    "test": "go test ./...",
+    "postinstall": "node ./scripts/postinstall.js"
   },
   "engines": {
     "node": ">=18"
   },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "tar": "^7.4.3"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Constantine1916/agnes-cli.git"
+  },
+  "agnes": {
+    "projectName": "agnes",
+    "releaseBaseUrlTemplate": "https://github.com/Constantine1916/agnes-cli/releases/download/v{version}"
   }
 }

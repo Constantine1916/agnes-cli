@@ -1,0 +1,54 @@
+version: 2
+
+project_name: agnes
+dist: dist
+
+builds:
+  - id: agnes
+    main: .
+    binary: agnes
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/Constantine1916/agnes-cli/internal/buildinfo.Version={{ .Version }}
+
+archives:
+  - id: default
+    ids:
+      - agnes
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: "SHA256SUMS"
+
+release:
+  github:
+    owner: Constantine1916
+    name: agnes-cli
+
+source:
+  enabled: false
+
+snapshot:
+  version_template: "{{ .Version }}-next"
+
+changelog:
+  disable: true
