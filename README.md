@@ -16,10 +16,17 @@ go build -o bin/agnes .
 
 Releases are tag-driven. A tag like `v0.1.0` builds macOS, Linux, and Windows
 binaries with GoReleaser, uploads them to GitHub Releases, then publishes the
-npm wrapper package.
+npm wrapper package with npm Trusted Publishing.
 
-Before the first npm publish, add an `NPM_TOKEN` repository secret with publish
-permission for the `agnes-cli` package.
+Before the first npm publish, configure npm Trusted Publishing for this package:
+
+1. Open the `agnes-cli` package settings on npmjs.com.
+2. Add GitHub Actions as a Trusted Publisher.
+3. Use repository `Constantine1916/agnes-cli`.
+4. Use workflow filename `release.yml`.
+5. Allow the `npm publish` action.
+
+No `NPM_TOKEN` GitHub secret is required.
 
 ```bash
 npm version patch --no-git-tag-version

@@ -7,8 +7,8 @@
     "access": "public"
   },
   "bin": {
-    "agnes": "./scripts/agnes.js",
-    "agnes-cli": "./scripts/agnes.js"
+    "agnes": "scripts/agnes.js",
+    "agnes-cli": "scripts/agnes.js"
   },
   "files": [
     "scripts",
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Constantine1916/agnes-cli.git"
+    "url": "git+https://github.com/Constantine1916/agnes-cli.git"
   },
   "agnes": {
     "projectName": "agnes",
