@@ -1,0 +1,31 @@
+{
+  "name": "agnes-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for Agnes multimodal agent workflows.",
+  "type": "module",
+  "bin": {
+    "agnes": "./dist/index.js",
+    "agnes-cli": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
