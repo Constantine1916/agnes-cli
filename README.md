@@ -16,11 +16,24 @@ go build -o bin/agnes .
 
 Releases are tag-driven. A tag like `v0.1.0` builds macOS, Linux, and Windows
 binaries with GoReleaser, uploads them to GitHub Releases, then publishes the
-npm wrapper package with npm Trusted Publishing.
+npm package with bundled release binaries and npm Trusted Publishing.
 
-Before the first npm publish, configure npm Trusted Publishing for this package:
+The published npm package is `@agnes-ai/agnes-cli`. It contains the README,
+minimal npm installer scripts, and prebuilt release archives under
+`npm-bundles/`; Go source code is published in this GitHub repository, not in
+the npm package.
 
-1. Open the `agnes-cli` package settings on npmjs.com.
+For the first npm publish, create the scoped package manually:
+
+```bash
+npm run prepare:npm-bundles -- v0.0.1
+npm pack --dry-run
+npm publish --access public
+```
+
+After the package exists on npm, configure npm Trusted Publishing:
+
+1. Open the `@agnes-ai/agnes-cli` package settings on npmjs.com.
 2. Add GitHub Actions as a Trusted Publisher.
 3. Use repository `Constantine1916/agnes-cli`.
 4. Use workflow filename `release.yml`.
@@ -31,7 +44,7 @@ No `NPM_TOKEN` GitHub secret is required.
 
 ```bash
 npm version patch --no-git-tag-version
-git add package.json
+git add package.json package-lock.json internal/buildinfo/buildinfo.go
 git commit -m "Release v0.1.1"
 git tag v0.1.1
 git push origin main --tags
@@ -40,7 +53,7 @@ git push origin main --tags
 After publish, users install with:
 
 ```bash
-npm install -g agnes-cli
+npm install -g @agnes-ai/agnes-cli
 agnes --version
 ```
 

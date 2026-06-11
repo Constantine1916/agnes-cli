@@ -95,6 +95,11 @@ jobs:
       - name: Ensure npm supports trusted publishing
         run: npm install -g npm@latest
 
+      - name: Bundle release assets for npm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run prepare:npm-bundles -- "$GITHUB_REF_NAME"
+
       - name: Preview npm package contents
         run: npm pack --dry-run
 

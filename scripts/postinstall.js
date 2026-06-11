@@ -5,8 +5,12 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
+const AdmZip = require("adm-zip");
+const tar = require("tar");
+
 const rootDir = path.resolve(__dirname, "..");
 const pkg = require(path.join(rootDir, "package.json"));
+const bundledAssetsDir = path.join(rootDir, pkg.agnes?.bundledAssetsDir || "npm-bundles");
 const vendorDir = path.join(rootDir, "vendor");
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agnes-npm-"));
 
@@ -31,26 +35,16 @@ async function main() {
     const assetName = `${projectName}_${version}_${target.os}_${target.arch}.${target.ext}`;
     const archivePath = path.join(tmpDir, assetName);
     const extractDir = path.join(tmpDir, "extract");
-    const baseUrl = resolveReleaseBaseUrl();
+    const sources = resolveReleaseSources();
 
     fs.rmSync(vendorDir, { recursive: true, force: true });
     fs.mkdirSync(vendorDir, { recursive: true });
     fs.mkdirSync(extractDir, { recursive: true });
 
-    const checksumText = await fetchText(`${baseUrl}/SHA256SUMS`);
-    const expectedSha = parseChecksum(checksumText, assetName);
-    if (!expectedSha) {
-      throw new Error(`checksum for ${assetName} not found in SHA256SUMS`);
-    }
-
-    log(`downloading ${assetName}`);
-    await downloadFile(`${baseUrl}/${assetName}`, archivePath);
-    const actualSha = sha256File(archivePath);
-    if (actualSha !== expectedSha) {
-      throw new Error(`checksum mismatch for ${assetName}`);
-    }
-
+    const expectedSha = await resolveExpectedSha(sources, assetName);
+    await materializeArchive(sources, assetName, archivePath, expectedSha);
     await extractArchive(archivePath, extractDir, target.ext);
+
     const extractedBinary = findFileRecursive(extractDir, target.bin);
     if (!extractedBinary) {
       throw new Error(`failed to locate ${target.bin} in extracted archive`);
@@ -76,6 +70,15 @@ function resolveTarget() {
   return target;
 }
 
+function resolveReleaseSources() {
+  const sources = [];
+  if (fs.existsSync(bundledAssetsDir)) {
+    sources.push({ name: "bundled npm assets", type: "local", basePath: bundledAssetsDir });
+  }
+  sources.push({ name: "GitHub Release", type: "remote", baseUrl: resolveReleaseBaseUrl() });
+  return sources;
+}
+
 function resolveReleaseBaseUrl() {
   if (process.env.AGNES_RELEASE_BASE_URL) {
     return stripTrailingSlash(process.env.AGNES_RELEASE_BASE_URL);
@@ -89,6 +92,50 @@ function resolveReleaseBaseUrl() {
       .replaceAll("{version}", pkg.version)
       .replaceAll("{tag}", `v${pkg.version}`)
   );
+}
+
+async function resolveExpectedSha(sources, assetName) {
+  const errors = [];
+  for (const source of sources) {
+    try {
+      const checksumText = source.type === "local"
+        ? fs.readFileSync(path.join(source.basePath, "SHA256SUMS"), "utf8")
+        : await fetchText(`${source.baseUrl}/SHA256SUMS`);
+      const expectedSha = parseChecksum(checksumText, assetName);
+      if (!expectedSha) {
+        throw new Error(`checksum for ${assetName} not found in SHA256SUMS`);
+      }
+      log(`using checksums from ${source.name}`);
+      return expectedSha;
+    } catch (err) {
+      errors.push(`${source.name}: ${err.message}`);
+    }
+  }
+  throw new Error(`failed to resolve checksums for ${assetName}\n${errors.join("\n")}`);
+}
+
+async function materializeArchive(sources, assetName, archivePath, expectedSha) {
+  const errors = [];
+  for (const source of sources) {
+    try {
+      if (source.type === "local") {
+        fs.copyFileSync(path.join(source.basePath, assetName), archivePath);
+      } else {
+        await downloadFile(`${source.baseUrl}/${assetName}`, archivePath);
+      }
+
+      const actualSha = sha256File(archivePath);
+      if (actualSha !== expectedSha) {
+        throw new Error(`checksum mismatch for ${assetName}`);
+      }
+      log(`using ${assetName} from ${source.name}`);
+      return;
+    } catch (err) {
+      fs.rmSync(archivePath, { force: true });
+      errors.push(`${source.name}: ${err.message}`);
+    }
+  }
+  throw new Error(`failed to obtain ${assetName}\n${errors.join("\n")}`);
 }
 
 function stripTrailingSlash(value) {
@@ -114,11 +161,9 @@ async function downloadFile(url, destination) {
 
 function parseChecksum(text, assetName) {
   for (const line of text.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    const [sha, name] = trimmed.split(/\s+/, 2);
-    if (name === assetName) {
-      return sha;
+    const match = line.trim().match(/^([a-fA-F0-9]{64})\s+\*?(.+)$/);
+    if (match && path.basename(match[2]) === assetName) {
+      return match[1].toLowerCase();
     }
   }
   return null;
@@ -132,12 +177,10 @@ function sha256File(filePath) {
 
 async function extractArchive(archivePath, extractDir, ext) {
   if (ext === "zip") {
-    const AdmZip = require("adm-zip");
     const zip = new AdmZip(archivePath);
     zip.extractAllTo(extractDir, true);
     return;
   }
-  const tar = require("tar");
   await tar.x({ file: archivePath, cwd: extractDir });
 }
 
