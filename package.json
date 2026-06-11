@@ -1,31 +1,25 @@
 {
   "name": "agnes-cli",
   "version": "0.1.0",
-  "description": "Command-line interface for Agnes multimodal agent workflows.",
-  "type": "module",
+  "description": "Agent-friendly CLI for Agnes image and video generation.",
   "bin": {
-    "agnes": "./dist/index.js",
-    "agnes-cli": "./dist/index.js"
+    "agnes": "./scripts/agnes.js",
+    "agnes-cli": "./scripts/agnes.js"
   },
   "files": [
-    "dist",
+    "scripts",
+    "vendor",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "build": "go build -o bin/agnes .",
+    "test": "go test ./..."
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
-  "dependencies": {
-    "commander": "^15.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.9.3",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Constantine1916/agnes-cli.git"
   }
 }

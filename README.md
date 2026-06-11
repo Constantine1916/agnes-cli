@@ -1,44 +1,74 @@
 # agnes-cli
 
-Command-line interface for Agnes multimodal agent workflows.
+Agent-friendly Go CLI for Agnes image and video generation.
 
-This repository is the CLI home for Agnes. The intended auth model is simple:
-users do not need to log in. They provide an API key with `--api-key` or
-`AGNES_API_KEY`, and the CLI passes requests to the Agnes agent runtime.
+The CLI is designed for agents first: stable commands, API-key based auth,
+URL-only result output on stdout, and diagnostics/progress on stderr.
 
-## Status
-
-Initial repository scaffold:
-
-- TypeScript CLI package
-- `agnes` and `agnes-cli` binary names
-- API key based runtime configuration
-- Placeholder adapter for the upcoming Agnes multimodal agent integration
-
-## Development
+## Install From Source
 
 ```bash
-npm install
-npm run build
-npm run dev -- doctor
-npm run dev -- ask "summarize this image" --api-key "$AGNES_API_KEY" --image ./example.png
+go build -o bin/agnes .
+./bin/agnes doctor --offline
 ```
 
-## Configuration
+## API Key
 
-The CLI reads configuration in this order:
+No login is required. Configure a key with one of:
 
-1. Command-line flags
-2. Environment variables
+```bash
+agnes key set "$AGNES_API_KEY"
+AGNES_API_KEY=... agnes image generate --prompt "A product photo" --size 1024x768
+agnes --api-key ... video status video_xxx
+```
 
-Supported values:
+Key precedence:
 
-- `--api-key` or `AGNES_API_KEY`
-- `OPENAI_API_KEY` as a compatibility fallback
-- `--api-base-url` or `AGNES_API_BASE_URL`
-- `--model` or `AGNES_MODEL`
+1. `--api-key`
+2. `AGNES_API_KEY`
+3. Saved key from `agnes key set`
 
-## Next step
+## Commands
 
-Wire `src/agent.ts` to the real Agnes multimodal agent runtime so prompts,
-images, and files can be sent through the same terminal command.
+```bash
+agnes key set <api-key>
+agnes key status
+agnes key clear
+
+agnes image generate \
+  --prompt "A clean product photo of a glass cube" \
+  --size 1024x768
+
+agnes image generate \
+  --prompt "Make it cinematic" \
+  --image ./input.png \
+  --model agnes-image-2.1-flash
+
+agnes video generate \
+  --prompt "A cat walking on the beach at sunset" \
+  --num-frames 121 \
+  --frame-rate 24
+
+agnes video generate \
+  --prompt "Smooth transition between keyframes" \
+  --image ./start.png \
+  --image ./end.png \
+  --mode keyframes
+
+agnes video status <video_id_or_task_id>
+agnes schema image.generate
+agnes schema video.generate
+agnes doctor
+```
+
+Use `--dry-run` to inspect a request payload without calling Agnes:
+
+```bash
+agnes --dry-run image generate --prompt "A futuristic city" --size 1024x768
+```
+
+## Output Contract
+
+Successful generation commands print only result URL(s) to stdout. Progress,
+task ids, and diagnostics are written to stderr. Errors are JSON envelopes on
+stderr with stable `type`, `subtype`, `message`, and `hint` fields.
