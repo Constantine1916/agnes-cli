@@ -1,6 +1,6 @@
 {
   "name": "@agnes-ai/agnes-cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Agent-friendly CLI for Agnes image and video generation.",
   "license": "MIT",
   "publishConfig": {
