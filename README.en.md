@@ -36,6 +36,12 @@ agnes key set "$AGNES_API_KEY"
 agnes key status
 ```
 
+If you do not have an API key yet, open the Agnes platform:
+
+```bash
+agnes key register
+```
+
 Inject a key for one command:
 
 ```bash
@@ -134,6 +140,7 @@ agnes schema video.generate
 agnes key set <api-key>
 agnes key status
 agnes key clear
+agnes key register
 
 agnes image generate --prompt "..." --size 1024x768
 agnes video generate --prompt "..." --num-frames 121 --frame-rate 24

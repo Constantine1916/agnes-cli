@@ -36,6 +36,12 @@ agnes key set "$AGNES_API_KEY"
 agnes key status
 ```
 
+还没有 API Key 时，可以打开 Agnes 平台申请：
+
+```bash
+agnes key register
+```
+
 临时注入 API Key：
 
 ```bash
@@ -134,6 +140,7 @@ agnes schema video.generate
 agnes key set <api-key>
 agnes key status
 agnes key clear
+agnes key register
 
 agnes image generate --prompt "..." --size 1024x768
 agnes video generate --prompt "..." --num-frames 121 --frame-rate 24

@@ -18,6 +18,7 @@ func newKeyCmd() *cobra.Command {
 	cmd.AddCommand(newKeySetCmd())
 	cmd.AddCommand(newKeyStatusCmd())
 	cmd.AddCommand(newKeyClearCmd())
+	cmd.AddCommand(newKeyRegisterCmd())
 	return cmd
 }
 
@@ -67,6 +68,22 @@ func newKeyClearCmd() *cobra.Command {
 				return clierrors.FileIO(err)
 			}
 			fmt.Fprintln(os.Stderr, "Saved Agnes API key cleared")
+			return nil
+		},
+	}
+}
+
+func newKeyRegisterCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "register",
+		Aliases: []string{"signup"},
+		Short:   "Open the Agnes platform to get an API key",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := openExternalURL(agnesPlatformURL); err != nil {
+				fmt.Fprintf(os.Stderr, "Open this URL to get an Agnes API key:\n%s\n", agnesPlatformURL)
+				return nil
+			}
+			fmt.Fprintf(os.Stderr, "Opening Agnes platform: %s\n", agnesPlatformURL)
 			return nil
 		},
 	}
